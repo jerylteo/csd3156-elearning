@@ -31,37 +31,35 @@ include "../inc/dbinfo.inc";
 
     // Get the course ID from the URL
     $course_id = isset($_GET['course']) ? intval($_GET['course']) : 0;
-    if ($course_id <= 0) {
-      echo "Invalid course ID.";
-      exit();
-    }
 
-    $courseQuery = mysqli_prepare($connection, "SELECT * FROM COURSES WHERE ID = ?");
-    mysqli_stmt_bind_param($courseQuery, "i", $course_id);
-    mysqli_stmt_execute($courseQuery);
-    $courseInfo = mysqli_stmt_get_result($courseQuery);
-
-    $stmt = mysqli_prepare($connection, "SELECT M.* 
-                                          FROM MODULES M
-                                          JOIN COURSE_MODULES CM ON M.ID = CM.MODULE_ID
-                                          WHERE CM.COURSE_ID = ?");
-    mysqli_stmt_bind_param($stmt, "i", $course_id);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    if (!$result) {
-      echo "Error executing query: " . mysqli_error($connection);
-      exit();
-    }
-    $moduleResult = mysqli_query($connection, $stmt);
-    $modules = [];
-
-    if ($moduleResult) {
-      while ($row = mysqli_fetch_assoc($moduleResult)) {
-        $modules[] = $row;
+    if ($course_id > 0) {
+      $courseQuery = mysqli_prepare($connection, "SELECT * FROM COURSES WHERE ID = ?");
+      mysqli_stmt_bind_param($courseQuery, "i", $course_id);
+      mysqli_stmt_execute($courseQuery);
+      $courseInfo = mysqli_stmt_get_result($courseQuery);
+  
+      $stmt = mysqli_prepare($connection, "SELECT M.* 
+                                            FROM MODULES M
+                                            JOIN COURSE_MODULES CM ON M.ID = CM.MODULE_ID
+                                            WHERE CM.COURSE_ID = ?");
+      mysqli_stmt_bind_param($stmt, "i", $course_id);
+      mysqli_stmt_execute($stmt);
+      $result = mysqli_stmt_get_result($stmt);
+      if (!$result) {
+        echo "Error executing query: " . mysqli_error($connection);
+        exit();
       }
+      $moduleResult = mysqli_query($connection, $stmt);
+      $modules = [];
+  
+      if ($moduleResult) {
+        while ($row = mysqli_fetch_assoc($moduleResult)) {
+          $modules[] = $row;
+        }
+      }
+  
+      mysqli_stmt_close($stmt);
     }
-
-    mysqli_stmt_close($stmt);
 
   ?>
 
