@@ -30,7 +30,7 @@ include "../inc/dbinfo.inc";
       $password = $_POST['password'];
 
       // Validate username and password
-      $query = "SELECT * FROM users WHERE username = ?";
+      $query = "SELECT * FROM STUDENTS WHERE USERNAME = ?";
       $stmt = mysqli_prepare($connection, $query);
       mysqli_stmt_bind_param($stmt, "s", $username);
       mysqli_stmt_execute($stmt);
@@ -38,7 +38,8 @@ include "../inc/dbinfo.inc";
 
       if ($result && mysqli_num_rows($result) > 0) {
         $user = mysqli_fetch_assoc($result);
-        if (password_verify($password, $user['password'])) {
+        echo $user['USERNAME'];
+        if (password_verify($password, $user['PASSWORD'])) {
           // Password is correct, set session variables
           $_SESSION['username'] = $username;
           header("Location: elearning.php");
