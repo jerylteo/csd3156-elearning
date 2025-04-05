@@ -24,11 +24,11 @@ include "../inc/dbinfo.inc";
     }
 
     $database = mysqli_select_db($connection, DB_DATABASE);
-
+    
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $username = trim($_POST['username']);
       $password = $_POST['password'];
-
+      echo "<p class='text-red-500'>Username: $username</p>";
       // Validate username and password
       $query = "SELECT * FROM STUDENTS WHERE USERNAME = ?";
       $stmt = mysqli_prepare($connection, $query);
@@ -38,7 +38,6 @@ include "../inc/dbinfo.inc";
 
       if ($result && mysqli_num_rows($result) > 0) {
         $user = mysqli_fetch_assoc($result);
-        echo $user['USERNAME'];
         if (password_verify($password, $user['PASSWORD'])) {
           // Password is correct, set session variables
           $_SESSION['username'] = $username;
