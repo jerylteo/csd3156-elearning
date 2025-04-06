@@ -47,7 +47,7 @@ include "../inc/dbinfo.inc";
           if (md5($password) === $user['PASSWORD']) {
             // Password is correct, set session variables
             $_SESSION['username'] = $username;
-            header("Location: elearning.php");
+            header("Location: courses.php");
             exit();
           } else {
             $error = "Invalid username or password.";
