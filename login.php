@@ -44,7 +44,7 @@ include "../inc/dbinfo.inc";
   
         if ($user = mysqli_fetch_assoc($result)) {
           
-          if (password_verify($password, $user['PASSWORD'])) {
+          if (md5($password) === $user['PASSWORD']) {
             // Password is correct, set session variables
             $_SESSION['username'] = $username;
             header("Location: elearning.php");
