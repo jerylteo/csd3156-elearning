@@ -25,32 +25,41 @@ include "../inc/dbinfo.inc";
 
     $database = mysqli_select_db($connection, DB_DATABASE);
     
+    $error = "";
+
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $username = trim($_POST['username']);
-      $password = $_POST['password'];
-      echo "<p class='text-red-500'>Username: $username</p>";
-      // Validate username and password
-      $query = "SELECT * FROM STUDENTS WHERE USERNAME = ?";
-      $stmt = mysqli_prepare($connection, $query);
-      mysqli_stmt_bind_param($stmt, "s", $username);
-      mysqli_stmt_execute($stmt);
-      $result = mysqli_stmt_get_result($stmt);
+      $password = trim($_POST['password']);
 
-      if ($result && mysqli_num_rows($result) > 0) {
-        $user = mysqli_fetch_assoc($result);
-        if (password_verify($password, $user['PASSWORD'])) {
-          // Password is correct, set session variables
-          $_SESSION['username'] = $username;
-          header("Location: elearning.php");
-          exit();
+      if (empty($username) || empty($password)) {
+        $error = "Username and password are required.";
+      }
+      else {
+        // Validate username and password
+        $query = "SELECT * FROM STUDENTS WHERE USERNAME = ?";
+        $stmt = mysqli_prepare($connection, $query);
+        mysqli_stmt_bind_param($stmt, "s", $username);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+  
+        if ($user = mysqli_fetch_assoc($result)) {
+          
+          if (password_verify($password, $user['PASSWORD'])) {
+            // Password is correct, set session variables
+            $_SESSION['username'] = $username;
+            header("Location: elearning.php");
+            exit();
+          } else {
+            $error = "Invalid username or password.";
+          }
         } else {
-          echo "<p class='text-red-500'>Invalid password.</p>";
+          $error = "Invalid username or password.";
         }
-      } else {
-        echo "<p class='text-red-500'>No user found with that username.</p>";
+  
+        mysqli_stmt_close($stmt);
+
       }
 
-      mysqli_stmt_close($stmt);
     }
 
     mysqli_close($connection);
@@ -91,7 +100,7 @@ include "../inc/dbinfo.inc";
 
 
       <div class="w-full mx-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
-        <form class="space-y-6" action="">
+        <form class="space-y-6" action="" method="POST">
           <h5 class="text-xl font-medium text-gray-900 dark:text-white">Sign in</h5>
           <div>
               <label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your username</label>
@@ -101,6 +110,11 @@ include "../inc/dbinfo.inc";
               <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your password</label>
               <input type="password" name="password" id="password" placeholder="••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
           </div>
+          <?php
+            if (!empty($error)) {
+              echo '<div class="text-red-500 text-sm">' . htmlspecialchars($error) . '</div>';
+            }
+          ?>
 
           <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Login to your account</button>
         </form>
