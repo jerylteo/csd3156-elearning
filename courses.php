@@ -124,13 +124,13 @@ if ($course_id > 0) {
                           Modules
                       </p>
 
-                      <dl class="max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
+                      <dl class="text-base max-w-md text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
                         <!-- Display Modules -->
                          <?php
                             foreach ($modules as $module) {
                                 echo '<div class="flex flex-col pb-3">';
-                                echo '<dt class="mb-1 text-gray-500 md:text-lg dark:text-gray-400">' . htmlspecialchars($module['MODULENAME']) . '</dt>';
-                                echo '<dd class="text-lg font-semibold">' . htmlspecialchars($module['DESCRIPTION']) . '</dd>';
+                                echo '<dt class="mb-1 md:text-lg">' . htmlspecialchars($module['MODULENAME']) . '</dt>';
+                                echo '<dd class="ml-4 text-sm text-gray-400 font-semibold">' . htmlspecialchars($module['DESCRIPTION']) . '</dd>';
                                 echo '</div>';
                             }
                          ?>
