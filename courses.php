@@ -14,55 +14,60 @@ include "../inc/dbinfo.inc";
 </head>
 <body>
 
-  <?php 
+<?php
+$togglePopup = false;
 
-    $togglePopup = false;
+/* Connect to MySQL and select the database. */
+$connection = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD);
 
+if (mysqli_connect_errno()) {
+  echo "Failed to connect to MySQL: " . mysqli_connect_error();
+  exit();
+}
 
-    /* Connect to MySQL and select the database. */
-    $connection = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD);
+mysqli_select_db($connection, DB_DATABASE);
 
-    if (mysqli_connect_errno()) {
-      echo "Failed to connect to MySQL: " . mysqli_connect_error();
-      exit();
+// Get the course ID from the URL
+$course_id = isset($_GET['course']) ? intval($_GET['course']) : 0;
+
+if ($course_id > 0) {
+  $togglePopup = true;
+
+  // Get course info
+  $courseQuery = mysqli_prepare($connection, "SELECT * FROM COURSES WHERE ID = ?");
+  mysqli_stmt_bind_param($courseQuery, "i", $course_id);
+  mysqli_stmt_execute($courseQuery);
+  $courseResult = mysqli_stmt_get_result($courseQuery);
+  $courseInfo = mysqli_fetch_assoc($courseResult); // ✅ this is your associative array
+
+  echo "Course Name: " . htmlspecialchars($courseInfo['COURSENAME']);
+
+  mysqli_stmt_close($courseQuery);
+
+  // Get modules linked to the course
+  $stmt = mysqli_prepare($connection, "SELECT M.* 
+                                       FROM MODULES M
+                                       JOIN COURSE_MODULES CM ON M.ID = CM.MODULE_ID
+                                       WHERE CM.COURSE_ID = ?");
+  mysqli_stmt_bind_param($stmt, "i", $course_id);
+  mysqli_stmt_execute($stmt);
+  $moduleResult = mysqli_stmt_get_result($stmt); 
+  $modules = [];
+
+  if ($moduleResult) {
+    while ($row = mysqli_fetch_assoc($moduleResult)) {
+      $modules[] = $row;
+      echo '<dt class="mb-1 text-gray-500 md:text-lg dark:text-gray-400">' . htmlspecialchars($row['MODULENAME']) . '</dt>';
     }
+  } else {
+    echo "No modules found.";
+  }
 
-    $database = mysqli_select_db($connection, DB_DATABASE);
+  mysqli_stmt_close($stmt);
+}
 
-    // Get the course ID from the URL
-    $course_id = isset($_GET['course']) ? intval($_GET['course']) : 0;
-    echo $course_id;
-
-    if ($course_id > 0) {
-      $courseQuery = mysqli_prepare($connection, "SELECT * FROM COURSES WHERE ID = ?");
-      mysqli_stmt_bind_param($courseQuery, "i", $course_id);
-      mysqli_stmt_execute($courseQuery);
-      $courseInfo = mysqli_stmt_get_result($courseQuery);
-  
-      echo $courseInfo['COURSENAME'];
-
-      $stmt = mysqli_prepare($connection, "SELECT M.* 
-                                            FROM MODULES M
-                                            JOIN COURSE_MODULES CM ON M.ID = CM.MODULE_ID
-                                            WHERE CM.COURSE_ID = ?");
-      mysqli_stmt_bind_param($stmt, "i", $course_id);
-      mysqli_stmt_execute($stmt);
-      $moduleResult = mysqli_query($connection, $stmt);
-      $modules = [];
-
-
-  
-      if ($moduleResult) {
-        while ($row = mysqli_fetch_assoc($moduleResult)) {
-          $modules[] = $row;
-          echo '<dt class="mb-1 text-gray-500 md:text-lg dark:text-gray-400">' . htmlspecialchars($row['MODULENAME']) . '</dt>';
-        }
-      }
-  
-      mysqli_stmt_close($stmt);
-    }
-
-  ?>
+mysqli_close($connection);
+?>
 
   <nav class="border-gray-200 bg-gray-900">
     <div class="container mx-auto">
