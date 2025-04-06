@@ -90,7 +90,7 @@ include "../inc/dbinfo.inc";
   
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
         <?php
-          $result = mysqli_query($connection, "SELECT * FROM COURSES");
+          $result = mysqli_query($connection, "SELECT * FROM COURSES LIMIT 6");
 
           while($row = mysqli_fetch_assoc($result)) {
             echo '
